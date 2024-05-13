@@ -1,10 +1,15 @@
 import express from "express";
 import mongoose from "mongoose";
+import {
+  loginUser,
+  registerUser,
+  verifyUser,
+} from "../controllers/auth.controller.js";
 
 const router = express.Router();
 
-router.get("/register", (req, res) => {
-  res.json("register ok.");
-});
+router.post("/register", registerUser);
+router.post("/login", loginUser);
+router.get("/verify", verifyUser);
 
 export default router;
