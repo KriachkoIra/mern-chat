@@ -60,12 +60,122 @@ body,
 }
 
 .send-message-div button,
-.send-message-div input {
+.send-message-div input,
+.my-bg-transparent {
   background-color: rgb(0, 0, 0, 0.5);
   border: none;
   color: white;
 }
 
+.my-bg-transparent {
+  color: rgb(122, 122, 133);
+}
+
+.my-bg-transparent:hover {
+  background-color: rgb(0, 0, 0, 0.3);
+  color: white;
+}
+
 .my-padding {
   padding-bottom: 60px;
+}
+
+.border-gray-right {
+  border-right: 1px solid rgb(122, 122, 133);
+}
+
+.border-gray-bottom {
+  border-bottom: 1px solid rgb(122, 122, 133);
+}
+
+.avatar {
+  height: 44px;
+  width: 44px;
+  background-color: rgb(0, 0, 0, 0.5);
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.avatar-main {
+  height: 54px;
+  width: 54px;
+  background-color: rgb(0, 0, 0, 0.5);
+  font-weight: 600;
+  font-size: 1.4rem;
+}
+
+.input-search-user {
+  background-color: rgb(0, 0, 0, 0.5);
+  border: none;
+  color: white;
+}
+
+.input-search-user::placeholder {
+  color: rgb(122, 122, 133);
+}
+
+.btn-search-user {
+  border-radius: 0px 5px 5px 0px;
+  background-color: rgb(0, 0, 0, 0.5);
+  border: none;
+  color: rgb(122, 122, 133);
+}
+
+.my-btn-outline {
+  border-radius: 0px 5px 5px 0px;
+}
+
+.btn-search-user:hover {
+  color: white;
+  background-color: rgb(0, 0, 0, 0.5);
+}
+
+.input-search-user::active {
+  border: none;
+  box-shadow: none;
+}
+
+.search-users-modal {
+  position: absolute; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  top: 5vh;
+  text-align: center;
+  width: 300px; /* Full width */
+  height: 80%; /* Full height */
+  overflow: auto;
+  background-color: rgb(0, 0, 0, 0.65);
+  border-radius: 15px;
+}
+
+.search-users-modal button:hover {
+  opacity: 60%;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: rgb(0, 0, 0, 0.3);
+  border-radius: 0 10px 10px 0;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: rgba(58, 58, 58, 0.65);
+  border-radius: 0 10px 10px 0;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.text-gray {
+  opacity: 60%;
 }

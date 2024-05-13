@@ -1,11 +1,13 @@
 import express from "express";
 import mongoose from "mongoose";
-import authRouter from "./routes/auth.js";
 import cors from "cors";
 import jwt from "jsonwebtoken";
 import WebSocket, { WebSocketServer } from "ws";
 import cookieParser from "cookie-parser";
 import "dotenv/config";
+
+import authRouter from "./routes/auth.js";
+import userRouter from "./routes/user.js";
 
 const uri = `mongodb+srv://kriachkoira:${process.env.DATABASE_PASS}@mern-chat.ch5jhfu.mongodb.net/?retryWrites=true&w=majority&appName=mern-chat`;
 const clientOptions = {
@@ -35,6 +37,7 @@ app.get("/test", (req, res) => {
 });
 
 app.use("/auth", authRouter);
+app.use("/users", userRouter);
 
 const server = app.listen(3001, () => {
   console.log(`Server is running on port 3001.`);
@@ -59,7 +62,7 @@ wss.on("connection", (connection, req) => {
     connection.username = username;
   });
 
-  console.log(token);
+  // console.log(token);
 
   const usersOnline = [...wss.clients].map((user) => {
     return {
