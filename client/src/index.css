@@ -238,3 +238,7 @@ body,
   right: 2px;
   bottom: 5px;
 }
+
+.logout-button:hover {
+  opacity: 60%;
+}

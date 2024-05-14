@@ -21,13 +21,13 @@ export default function Chat() {
   }, []);
 
   function reconnect() {
-    setTimeout(() => {
-      console.log("reconnecting...");
-      const socket = new WebSocket("ws://localhost:3001");
-      socket.addEventListener("message", handleMessage);
-      socket.addEventListener("close", this);
-      setWs(socket);
-    }, 1000);
+    // setTimeout(() => {
+    //   console.log("reconnecting...");
+    //   const socket = new WebSocket("ws://localhost:3001");
+    //   socket.addEventListener("message", handleMessage);
+    //   socket.addEventListener("close", this);
+    //   setWs(socket);
+    // }, 1000);
   }
 
   function handleMessage(e) {

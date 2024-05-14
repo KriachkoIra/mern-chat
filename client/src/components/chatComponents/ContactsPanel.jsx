@@ -8,7 +8,16 @@ export default function ContactsPanel({ usersOnline }) {
   const [contacts, setContacts] = useState([]);
   const [search, setSearch] = useState("");
 
-  const { username, id } = useContext(UserContext);
+  const {
+    username,
+    id,
+    setId,
+    setUsername,
+    setSelectedChat,
+    setSelectedChatMessages,
+    ws,
+    setWs,
+  } = useContext(UserContext);
 
   function getContacts() {
     axios
@@ -18,6 +27,22 @@ export default function ContactsPanel({ usersOnline }) {
       })
       .catch((err) => {
         // setAlert(err.response.data.message);
+        console.log(err);
+      });
+  }
+
+  function logout() {
+    axios
+      .post(`auth/logout`)
+      .then(() => {
+        setId(null);
+        setSelectedChat(null);
+        setSelectedChatMessages([]);
+        ws?.close();
+        setWs(null);
+        setUsername(null);
+      })
+      .catch((err) => {
         console.log(err);
       });
   }
@@ -32,6 +57,12 @@ export default function ContactsPanel({ usersOnline }) {
             {username[0]}
           </div>
           <h4 className="col">{username}</h4>
+          <button
+            className="col-auto bg-transparent border-0 text-white logout-button"
+            onClick={logout}
+          >
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
         </div>
 
         <div className="row mb-3">
@@ -52,7 +83,7 @@ export default function ContactsPanel({ usersOnline }) {
                 contact={user}
                 key={user.username}
                 isOnline={usersOnline.find(
-                  (u) => u.username.localeCompare(user.username) === 0
+                  (u) => u.username?.localeCompare(user.username) === 0
                 )}
               />
             ) : null

@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { wss } from "../index.js";
+import { getUserData } from "./user.controller.js";
 
 const registerUser = async function (req, res) {
   try {
@@ -63,6 +65,19 @@ const loginUser = async function (req, res) {
   } catch (err) {}
 };
 
+const logoutUser = function (req, res) {
+  const { username } = getUserData(req);
+
+  console.log(username);
+
+  [...wss.clients]
+    .filter((cl) => cl.username === username)
+    .forEach((cl) => cl.close());
+
+  res.clearCookie("token");
+  return res.json({ logout: true });
+};
+
 const verifyUser = async function (req, res) {
   try {
     const token = req.cookies?.token;
@@ -80,4 +95,4 @@ const verifyUser = async function (req, res) {
   }
 };
 
-export { registerUser, loginUser, verifyUser };
+export { registerUser, loginUser, logoutUser, verifyUser };

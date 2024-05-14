@@ -49,7 +49,7 @@ const server = app.listen(3001, () => {
   console.log(`Server is running on port 3001.`);
 });
 
-const wss = new WebSocketServer({ server });
+export const wss = new WebSocketServer({ server });
 wss.on("connection", (connection, req) => {
   // terminate previous connections
   connection.checkIsAlive = setInterval(() => {
@@ -66,6 +66,8 @@ wss.on("connection", (connection, req) => {
     ?.split(";")
     .map((str) => str.trim())
     .find((str) => str.startsWith("token"));
+
+  if (!cookie) return;
 
   const token = cookie.split("=")[1];
 

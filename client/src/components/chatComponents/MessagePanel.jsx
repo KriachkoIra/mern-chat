@@ -13,6 +13,9 @@ export default function MessagesPanel({ handleMessage }) {
         {selectedChat ? (
           <>
             <div className="mt-3 mb-2 px-2 messages-container">
+              {selectedChatMessages.length === 0 && (
+                <p className="text-gray mt-3 text-center">No messages yet.</p>
+              )}
               {selectedChatMessages.map((msg, i) => (
                 <Message key={i} msg={msg} />
               ))}
