@@ -1,4 +1,5 @@
 import axios from "axios";
+import { uniqBy } from "lodash";
 import { createContext, useEffect, useState } from "react";
 
 export const UserContext = createContext({});
@@ -8,6 +9,7 @@ export function UserContextProvider({ children }) {
   const [id, setId] = useState(null);
   const [username, setUsername] = useState(null);
   const [selectedChat, setSelectedChat] = useState(null);
+  const [selectedChatMessages, setSelectedChatMessages] = useState([]);
 
   useEffect(() => {
     axios
@@ -23,6 +25,10 @@ export function UserContextProvider({ children }) {
       });
   });
 
+  // useEffect(() => {
+  //   setSelectedChatMessages((msgs) => uniqBy(msgs, "id"));
+  // }, []);
+
   return (
     <UserContext.Provider
       value={{
@@ -34,6 +40,8 @@ export function UserContextProvider({ children }) {
         setSelectedChat,
         ws,
         setWs,
+        selectedChatMessages,
+        setSelectedChatMessages,
       }}
     >
       {children}

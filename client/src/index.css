@@ -167,13 +167,13 @@ body,
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: rgba(58, 58, 58, 0.65);
+  background: rgba(0, 0, 0, 0.4);
   border-radius: 0 10px 10px 0;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: rgb(58, 58, 58);
 }
 
 .text-gray {
@@ -181,7 +181,7 @@ body,
 }
 
 .contact-div:hover {
-  background-color: rgb(255, 255, 255, 0.2);
+  background-color: rgb(255, 255, 255, 0.1);
   border-radius: 10px;
 }
 
@@ -198,4 +198,32 @@ body,
   opacity: 90%;
   padding: 0;
   border-radius: 2px;
+}
+
+.my-message {
+  background-color: rgb(72, 123, 189);
+  margin-left: auto;
+}
+
+.others-message {
+  background-color: rgba(0, 0, 0, 0.35);
+}
+
+.chat-message {
+  max-width: 320px;
+  border-radius: 10px;
+  width: fit-content;
+}
+
+.height-parent {
+  position: relative;
+  height: 100%;
+  max-height: 100%;
+}
+
+.messages-container {
+  display: block;
+  overflow-y: scroll;
+  height: 100%;
+  max-height: 82vh;
 }

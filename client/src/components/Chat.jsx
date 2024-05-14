@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext } from "react";
 import { UserContext } from "../context/UserContext";
+import { uniqBy } from "lodash";
 import axios from "axios";
-import Modal from "react-modal";
 
 import ContactsPanel from "./chatComponents/ContactsPanel";
 import MessagesPanel from "./chatComponents/MessagePanel";
@@ -12,7 +12,8 @@ export default function Chat() {
   const [isBgToolbar, setIsBgToolbar] = useState(false);
   const [usersOnline, setUsersOnline] = useState([]);
 
-  const { setWs } = useContext(UserContext);
+  const { setWs, selectedChatMessages, setSelectedChatMessages } =
+    useContext(UserContext);
 
   useEffect(() => {
     const socket = new WebSocket("ws://localhost:3001");
@@ -22,7 +23,17 @@ export default function Chat() {
 
   function handleMessage(e) {
     const data = JSON.parse(e.data);
-    showContactsOnline(data.usersOnline);
+    if (data?.usersOnline) showContactsOnline(data.usersOnline);
+    else if (data?.message) {
+      console.log(data.msgId);
+
+      setSelectedChatMessages((msgs) =>
+        uniqBy(
+          [...msgs, { text: data.message, from: data.from, id: data.msgId }],
+          "id"
+        )
+      );
+    }
   }
 
   function showContactsOnline(usersDuplicated) {

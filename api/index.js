@@ -9,6 +9,9 @@ import "dotenv/config";
 import authRouter from "./routes/auth.js";
 import userRouter from "./routes/user.js";
 
+import Message from "./models/Message.js";
+import User from "./models/User.js";
+
 const uri = `mongodb+srv://kriachkoira:${process.env.DATABASE_PASS}@mern-chat.ch5jhfu.mongodb.net/?retryWrites=true&w=majority&appName=mern-chat`;
 const clientOptions = {
   serverApi: { version: "1", strict: true, deprecationErrors: true },
@@ -62,9 +65,34 @@ wss.on("connection", (connection, req) => {
     connection.username = username;
   });
 
-  connection.on("message", (messageUnparsed) => {
+  connection.on("message", async (messageUnparsed) => {
     const { message, to } = JSON.parse(messageUnparsed.toString());
-    console.log(message, to);
+
+    try {
+      const toId = User.findOne({ username: to })?._id;
+
+      const dbMessage = new Message({
+        text: message,
+        to: toId,
+        from: connection.userId,
+      });
+
+      const savedMessage = await dbMessage.save();
+
+      [...wss.clients]
+        .filter((cl) => cl.username === to)
+        .forEach((cl) =>
+          cl.send(
+            JSON.stringify({
+              message,
+              from: connection.username,
+              msgId: savedMessage._id,
+            })
+          )
+        );
+    } catch (err) {
+      console.log(err);
+    }
   });
 
   // console.log(token);

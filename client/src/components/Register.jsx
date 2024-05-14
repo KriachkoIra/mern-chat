@@ -7,7 +7,7 @@ export default function Register() {
   const [username, setUsernameField] = useState("");
   const [password, setPassword] = useState("");
   const [alert, setAlert] = useState("");
-  const [isRegister, setIsRegister] = useState(true);
+  const [isRegister, setIsRegister] = useState(false);
 
   const { setUsername, setId } = useContext(UserContext);
 
