@@ -21,18 +21,19 @@ export default function Chat() {
   }, []);
 
   function reconnect() {
-    console.log("reconnecting...");
-    const socket = new WebSocket("ws://localhost:3001");
-    socket.addEventListener("message", handleMessage);
-    socket.addEventListener("close", this);
-    setWs(socket);
+    setTimeout(() => {
+      console.log("reconnecting...");
+      const socket = new WebSocket("ws://localhost:3001");
+      socket.addEventListener("message", handleMessage);
+      socket.addEventListener("close", this);
+      setWs(socket);
+    }, 1000);
   }
 
   function handleMessage(e) {
     const data = JSON.parse(e.data);
     if (data?.usersOnline) showContactsOnline(data.usersOnline);
     else if (data?.message) {
-      console.log("here");
       setSelectedChatMessages((msgs) =>
         uniqBy(
           [...msgs, { text: data.message, from: data.from, _id: data.msgId }],
@@ -52,7 +53,7 @@ export default function Chat() {
     for (const [userId, username] of Object.entries(usersObject)) {
       users.push({ userId, username });
     }
-    console.log(users);
+
     setUsersOnline(users);
   }
 

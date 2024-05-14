@@ -73,7 +73,7 @@ function NewMessagePanel({
 
   const sendMessage = function (e) {
     e.preventDefault();
-    console.log(ws.readyState);
+
     if (ws.readyState === 2 || ws.readyState === 3) {
       const socket = new WebSocket("ws://localhost:3001");
       socket.addEventListener("message", handleMessage);

@@ -14,7 +14,6 @@ export default function ContactsPanel({ usersOnline }) {
     axios
       .get(`users/${id}/contacts`)
       .then((res) => {
-        console.log(res);
         setContacts(res.data.contacts);
       })
       .catch((err) => {

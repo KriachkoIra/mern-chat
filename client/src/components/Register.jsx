@@ -19,7 +19,6 @@ export default function Register() {
     await axios
       .post(link, { username, password })
       .then((res) => {
-        console.log(res);
         setId(res.data.id);
         setUsername(res.data.username);
       })

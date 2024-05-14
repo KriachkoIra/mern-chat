@@ -8,25 +8,12 @@ export default function SearchContactModal({ setIsOpen, getContacts }) {
 
   const { id, username } = useContext(UserContext);
 
-  const handleSearch = function () {
-    axios
-      .get(`users/contacts?usernameSearch=${searchUser}`)
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((err) => {
-        // setAlert(err.response.data.message);
-        console.log(err);
-      });
-  };
-
   const handleChange = function (e) {
     setSearchUser(e.target.value);
 
     axios
       .get(`users/${id}/seachContacts?usernameSearch=${e.target.value}`)
       .then((res) => {
-        console.log(res);
         setResultUsers(res.data.users);
       })
       .catch((err) => {
@@ -62,7 +49,6 @@ export default function SearchContactModal({ setIsOpen, getContacts }) {
             <button
               className="btn btn-outline-secondary my-btn-outline"
               type="button"
-              onClick={handleSearch}
             >
               <i className="fa-solid fa-magnifying-glass"></i>
             </button>
@@ -92,7 +78,6 @@ function SearchUser({ user, setIsOpen, getContacts }) {
     axios
       .post(`users/${id}/contacts`, { usernameAdd: user.username })
       .then((res) => {
-        console.log(res);
         setIsOpen(false);
         getContacts();
       })

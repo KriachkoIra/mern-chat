@@ -51,7 +51,16 @@ const server = app.listen(3001, () => {
 
 const wss = new WebSocketServer({ server });
 wss.on("connection", (connection, req) => {
-  // console.log("connected");
+  // terminate previous connections
+  connection.checkIsAlive = setInterval(() => {
+    connection.ping();
+    connection.terminateTimer = setTimeout(() => {
+      connection.terminate();
+      clearInterval(connection.checkIsAlive);
+    }, 1000);
+  }, 5000);
+
+  connection.on("pong", () => clearTimeout(connection.terminateTimer));
 
   const cookie = req.headers.cookie
     ?.split(";")
@@ -68,6 +77,7 @@ wss.on("connection", (connection, req) => {
     connection.username = username;
   });
 
+  // receive message
   connection.on("message", async (messageUnparsed) => {
     const { message, to } = JSON.parse(messageUnparsed.toString());
 
@@ -91,6 +101,7 @@ wss.on("connection", (connection, req) => {
     }
   });
 
+  // get users online
   setInterval(() => {
     const usersOnline = [...wss.clients].map((user) => {
       return {
