@@ -12,6 +12,7 @@ import messageRouter from "./routes/message.js";
 
 import Message from "./models/Message.js";
 import User from "./models/User.js";
+import { addMessage } from "./controllers/messages.controller.js";
 
 const uri = `mongodb+srv://kriachkoira:${process.env.DATABASE_PASS}@mern-chat.ch5jhfu.mongodb.net/?retryWrites=true&w=majority&appName=mern-chat`;
 const clientOptions = {
@@ -71,17 +72,9 @@ wss.on("connection", (connection, req) => {
     const { message, to } = JSON.parse(messageUnparsed.toString());
 
     try {
-      const toUser = await User.findOne({ username: to });
+      const savedMessage = await addMessage(message, connection.userId, to);
 
-      if (toUser) {
-        const dbMessage = new Message({
-          text: message,
-          to: toUser._id,
-          from: connection.userId,
-        });
-
-        const savedMessage = await dbMessage.save();
-
+      savedMessage &&
         [...wss.clients]
           .filter((cl) => cl.username === to)
           .forEach((cl) =>
@@ -93,7 +86,6 @@ wss.on("connection", (connection, req) => {
               })
             )
           );
-      }
     } catch (err) {
       console.log(err);
     }

@@ -38,4 +38,31 @@ const getMessages = async function (req, res) {
   }
 };
 
-export { getMessages };
+const addMessage = async function (text, from, to) {
+  const fromUser = await User.findById(from);
+  const toUser = await User.findOne({ username: to });
+
+  const isInContacts = toUser.contacts.find(
+    (c) => c.username === fromUser.username
+  );
+
+  if (!isInContacts) {
+    toUser.contacts.push({ username: fromUser.username });
+    await toUser.save();
+  }
+
+  if (toUser) {
+    const dbMessage = new Message({
+      text,
+      to: toUser,
+      from,
+    });
+
+    const savedMessage = await dbMessage.save();
+    return savedMessage;
+  }
+
+  return null;
+};
+
+export { getMessages, addMessage };
