@@ -8,12 +8,11 @@ import MessagesPanel from "./chatComponents/MessagePanel";
 import BackgroundToolbar from "./chatComponents/BackgroundToolbar";
 
 export default function Chat() {
-  const [ws, setWs] = useState(null);
   const [bg, setBg] = useState(1);
   const [isBgToolbar, setIsBgToolbar] = useState(false);
   const [usersOnline, setUsersOnline] = useState([]);
 
-  const { username, id } = useContext(UserContext);
+  const { setWs } = useContext(UserContext);
 
   useEffect(() => {
     const socket = new WebSocket("ws://localhost:3001");

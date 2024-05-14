@@ -45,7 +45,7 @@ const server = app.listen(3001, () => {
 
 const wss = new WebSocketServer({ server });
 wss.on("connection", (connection, req) => {
-  console.log("connected");
+  // console.log("connected");
 
   const cookie = req.headers.cookie
     ?.split(";")
@@ -60,6 +60,11 @@ wss.on("connection", (connection, req) => {
 
     connection.userId = id;
     connection.username = username;
+  });
+
+  connection.on("message", (messageUnparsed) => {
+    const { message, to } = JSON.parse(messageUnparsed.toString());
+    console.log(message, to);
   });
 
   // console.log(token);

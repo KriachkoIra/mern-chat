@@ -179,3 +179,23 @@ body,
 .text-gray {
   opacity: 60%;
 }
+
+.contact-div:hover {
+  background-color: rgb(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+.contact-selected {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+}
+
+.selected-side {
+  display: inline;
+  width: 4px;
+  height: 90%;
+  background-color: aliceblue;
+  opacity: 90%;
+  padding: 0;
+  border-radius: 2px;
+}

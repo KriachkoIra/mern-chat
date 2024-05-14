@@ -1,7 +1,6 @@
-import { useEffect, useState, useContext } from "react";
+import { useState, useContext } from "react";
 import { UserContext } from "../../context/UserContext";
 import axios from "axios";
-import ContactsPanel, { Contact } from "./ContactsPanel";
 
 export default function SearchContactModal({ setIsOpen, getContacts }) {
   const [searchUser, setSearchUser] = useState("");

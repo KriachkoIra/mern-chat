@@ -36,25 +36,7 @@ export default function ContactsPanel() {
         </div>
 
         <div className="row mb-3">
-          <div className="input-group col px-1">
-            <input
-              type="text"
-              className="form-control input-search-user"
-              placeholder="Search contact"
-              data-bs-theme="dark"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <div className="input-group-append">
-              <button
-                className="btn btn-outline-secondary btn-search-user"
-                type="button"
-              >
-                <i className="fa-solid fa-magnifying-glass"></i>
-              </button>
-            </div>
-          </div>
-
+          <SearchContactPanel serach={search} setSearch={setSearch} />
           <button
             type="button"
             className="col-auto rounded my-bg-transparent"
@@ -82,12 +64,43 @@ export default function ContactsPanel() {
   );
 }
 
+function SearchContactPanel({ search, setSearch }) {
+  return (
+    <div className="input-group col px-1">
+      <input
+        type="text"
+        className="form-control input-search-user"
+        placeholder="Search contact"
+        data-bs-theme="dark"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+      <div className="input-group-append">
+        <button
+          className="btn btn-outline-secondary btn-search-user"
+          type="button"
+        >
+          <i className="fa-solid fa-magnifying-glass"></i>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function Contact({ contact }) {
+  const { selectedChat, setSelectedChat } = useContext(UserContext);
+
   return (
     <div
-      className="row gap-3 align-items-center py-2 border-gray-bottom"
+      className={`row gap-3 align-items-center py-2 border-gray-bottom contact-div ${
+        contact.username === selectedChat ? "contact-selected" : ""
+      }`}
       style={{ cursor: "pointer" }}
+      onClick={() => setSelectedChat(contact.username)}
     >
+      {contact.username === selectedChat && (
+        <div className="selected-side"></div>
+      )}
       <Avatar username={contact.username} /> {contact.username}
     </div>
   );
