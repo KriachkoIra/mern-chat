@@ -1,7 +1,6 @@
 import { useEffect, useState, useContext } from "react";
 import { UserContext } from "../context/UserContext";
 import { uniqBy } from "lodash";
-import axios from "axios";
 
 import ContactsPanel from "./chatComponents/ContactsPanel";
 import MessagesPanel from "./chatComponents/MessagePanel";
@@ -12,24 +11,31 @@ export default function Chat() {
   const [isBgToolbar, setIsBgToolbar] = useState(false);
   const [usersOnline, setUsersOnline] = useState([]);
 
-  const { setWs, selectedChatMessages, setSelectedChatMessages } =
-    useContext(UserContext);
+  const { setWs, setSelectedChatMessages } = useContext(UserContext);
 
   useEffect(() => {
     const socket = new WebSocket("ws://localhost:3001");
     socket.addEventListener("message", handleMessage);
+    socket.addEventListener("close", reconnect);
     setWs(socket);
   }, []);
+
+  function reconnect() {
+    console.log("reconnecting...");
+    const socket = new WebSocket("ws://localhost:3001");
+    socket.addEventListener("message", handleMessage);
+    socket.addEventListener("close", this);
+    setWs(socket);
+  }
 
   function handleMessage(e) {
     const data = JSON.parse(e.data);
     if (data?.usersOnline) showContactsOnline(data.usersOnline);
     else if (data?.message) {
-      console.log(data.msgId);
-
+      console.log("here");
       setSelectedChatMessages((msgs) =>
         uniqBy(
-          [...msgs, { text: data.message, from: data.from, id: data.msgId }],
+          [...msgs, { text: data.message, from: data.from, _id: data.msgId }],
           "_id"
         )
       );
@@ -46,7 +52,7 @@ export default function Chat() {
     for (const [userId, username] of Object.entries(usersObject)) {
       users.push({ userId, username });
     }
-    // console.log(users);
+    console.log(users);
     setUsersOnline(users);
   }
 
@@ -57,8 +63,8 @@ export default function Chat() {
     >
       <div className="container chat-container col-sm-11 col-md-10 col-lg-9 text-white">
         <div className="row gap-1 h-100">
-          <ContactsPanel />
-          <MessagesPanel />
+          <ContactsPanel usersOnline={usersOnline} />
+          <MessagesPanel handleMessage={handleMessage} />
         </div>
       </div>
       <button className="bg-btn" onClick={() => setIsBgToolbar((cur) => !cur)}>

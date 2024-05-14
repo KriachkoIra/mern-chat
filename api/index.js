@@ -99,18 +99,16 @@ wss.on("connection", (connection, req) => {
     }
   });
 
-  // console.log(token);
+  setInterval(() => {
+    const usersOnline = [...wss.clients].map((user) => {
+      return {
+        userId: user.userId,
+        username: user.username,
+      };
+    });
 
-  const usersOnline = [...wss.clients].map((user) => {
-    return {
-      userId: user.userId,
-      username: user.username,
-    };
-  });
-
-  // console.log(usersOnline);
-
-  [...wss.clients].forEach((client) =>
-    client.send(JSON.stringify({ usersOnline }))
-  );
+    [...wss.clients].forEach((client) =>
+      client.send(JSON.stringify({ usersOnline }))
+    );
+  }, 3000);
 });

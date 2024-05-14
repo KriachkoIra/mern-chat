@@ -2,7 +2,7 @@ import { useState, useContext, useRef, useEffect } from "react";
 import { UserContext } from "../../context/UserContext";
 import axios from "axios";
 
-export default function MessagesPanel() {
+export default function MessagesPanel({ handleMessage }) {
   const { selectedChat, setSelectedChatMessages, selectedChatMessages } =
     useContext(UserContext);
   const messagesContainerEnd = useRef();
@@ -16,12 +16,13 @@ export default function MessagesPanel() {
               {selectedChatMessages.map((msg, i) => (
                 <Message key={i} msg={msg} />
               ))}
-              <div ref={messagesContainerEnd}></div>
+              <div ref={messagesContainerEnd} id="anchor"></div>
             </div>
             <NewMessagePanel
               to={selectedChat}
               setMessages={setSelectedChatMessages}
               messagesContainerEnd={messagesContainerEnd}
+              handleMessage={handleMessage}
             />
           </>
         ) : (
@@ -52,20 +53,34 @@ function Message({ msg }) {
   );
 }
 
-function NewMessagePanel({ to, setMessages, messagesContainerEnd }) {
+function NewMessagePanel({
+  to,
+  setMessages,
+  messagesContainerEnd,
+  handleMessage,
+}) {
   const [messageText, setMessageText] = useState("");
 
   const { setWs, ws, username, id } = useContext(UserContext);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      document.getElementById("anchor").scrollIntoView();
+    }, 150);
+
+    return () => clearTimeout(timeoutId);
+  }, [to]);
 
   const sendMessage = function (e) {
     e.preventDefault();
     console.log(ws.readyState);
     if (ws.readyState === 2 || ws.readyState === 3) {
       const socket = new WebSocket("ws://localhost:3001");
+      socket.addEventListener("message", handleMessage);
       setWs(socket);
       setTimeout(
         () => socket.send(JSON.stringify({ message: messageText, to })),
-        2000
+        1000
       );
     } else {
       ws.send(JSON.stringify({ message: messageText, to }));

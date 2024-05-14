@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-export async function getUserData(req) {
+export function getUserData(req) {
   const token = req.cookies?.token;
   let data;
 

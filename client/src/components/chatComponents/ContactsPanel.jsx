@@ -3,7 +3,7 @@ import { UserContext } from "../../context/UserContext";
 import axios from "axios";
 import SearchContactModal from "./SearchContactModal";
 
-export default function ContactsPanel() {
+export default function ContactsPanel({ usersOnline }) {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [contacts, setContacts] = useState([]);
   const [search, setSearch] = useState("");
@@ -49,7 +49,13 @@ export default function ContactsPanel() {
         <div className="row justify-content-center">
           {contacts.map((user) =>
             user.username.toLowerCase().includes(search) ? (
-              <Contact contact={user} key={user.username} />
+              <Contact
+                contact={user}
+                key={user.username}
+                isOnline={usersOnline.find(
+                  (u) => u.username.localeCompare(user.username) === 0
+                )}
+              />
             ) : null
           )}
         </div>
@@ -87,7 +93,7 @@ function SearchContactPanel({ search, setSearch }) {
   );
 }
 
-function Contact({ contact }) {
+function Contact({ contact, isOnline }) {
   const { selectedChat, setSelectedChat } = useContext(UserContext);
 
   return (
@@ -101,13 +107,17 @@ function Contact({ contact }) {
       {contact.username === selectedChat && (
         <div className="selected-side"></div>
       )}
-      <Avatar username={contact.username} /> {contact.username}
+      <Avatar username={contact.username} isOnline={isOnline} />{" "}
+      {contact.username}
     </div>
   );
 }
 
-function Avatar({ username }) {
+function Avatar({ username, isOnline }) {
   return (
-    <div className="avatar text-center pt-2 rounded-circle">{username[0]}</div>
+    <div className="avatar text-center pt-2 rounded-circle">
+      {isOnline && <div className="dot"></div>}
+      {username[0]}
+    </div>
   );
 }
