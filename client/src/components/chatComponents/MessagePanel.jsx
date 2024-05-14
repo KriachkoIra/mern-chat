@@ -37,12 +37,12 @@ export default function MessagesPanel() {
 }
 
 function Message({ msg }) {
-  const { username } = useContext(UserContext);
+  const { username, id } = useContext(UserContext);
 
   return (
     <div
       className={`px-3 py-2 chat-message mb-2 ${
-        username.localeCompare(msg.from) === 0
+        id.localeCompare(msg.from) === 0
           ? "my-message text-end"
           : "others-message"
       }`}
@@ -55,7 +55,7 @@ function Message({ msg }) {
 function NewMessagePanel({ to, setMessages, messagesContainerEnd }) {
   const [messageText, setMessageText] = useState("");
 
-  const { setWs, ws, username } = useContext(UserContext);
+  const { setWs, ws, username, id } = useContext(UserContext);
 
   const sendMessage = function (e) {
     e.preventDefault();
@@ -73,7 +73,7 @@ function NewMessagePanel({ to, setMessages, messagesContainerEnd }) {
 
     setMessages((msgs) => [
       ...msgs,
-      { text: messageText, from: username, id: Date.now() },
+      { text: messageText, from: id, _id: Date.now() },
     ]);
     setMessageText("");
 

@@ -30,7 +30,7 @@ export default function Chat() {
       setSelectedChatMessages((msgs) =>
         uniqBy(
           [...msgs, { text: data.message, from: data.from, id: data.msgId }],
-          "id"
+          "_id"
         )
       );
     }

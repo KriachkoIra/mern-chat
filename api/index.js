@@ -8,6 +8,7 @@ import "dotenv/config";
 
 import authRouter from "./routes/auth.js";
 import userRouter from "./routes/user.js";
+import messageRouter from "./routes/message.js";
 
 import Message from "./models/Message.js";
 import User from "./models/User.js";
@@ -41,6 +42,7 @@ app.get("/test", (req, res) => {
 
 app.use("/auth", authRouter);
 app.use("/users", userRouter);
+app.use("/messages", messageRouter);
 
 const server = app.listen(3001, () => {
   console.log(`Server is running on port 3001.`);
@@ -69,27 +71,29 @@ wss.on("connection", (connection, req) => {
     const { message, to } = JSON.parse(messageUnparsed.toString());
 
     try {
-      const toId = User.findOne({ username: to })?._id;
+      const toUser = await User.findOne({ username: to });
 
-      const dbMessage = new Message({
-        text: message,
-        to: toId,
-        from: connection.userId,
-      });
+      if (toUser) {
+        const dbMessage = new Message({
+          text: message,
+          to: toUser._id,
+          from: connection.userId,
+        });
 
-      const savedMessage = await dbMessage.save();
+        const savedMessage = await dbMessage.save();
 
-      [...wss.clients]
-        .filter((cl) => cl.username === to)
-        .forEach((cl) =>
-          cl.send(
-            JSON.stringify({
-              message,
-              from: connection.username,
-              msgId: savedMessage._id,
-            })
-          )
-        );
+        [...wss.clients]
+          .filter((cl) => cl.username === to)
+          .forEach((cl) =>
+            cl.send(
+              JSON.stringify({
+                message,
+                from: connection.username,
+                msgId: savedMessage._id,
+              })
+            )
+          );
+      }
     } catch (err) {
       console.log(err);
     }

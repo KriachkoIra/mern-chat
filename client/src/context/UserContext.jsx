@@ -1,5 +1,4 @@
 import axios from "axios";
-import { uniqBy } from "lodash";
 import { createContext, useEffect, useState } from "react";
 
 export const UserContext = createContext({});
@@ -25,9 +24,20 @@ export function UserContextProvider({ children }) {
       });
   });
 
-  // useEffect(() => {
-  //   setSelectedChatMessages((msgs) => uniqBy(msgs, "id"));
-  // }, []);
+  useEffect(() => {
+    if (selectedChat) {
+      axios
+        .get(`/messages/${id}/${selectedChat}`)
+        .then((res) => {
+          // console.log(res);
+          setSelectedChatMessages(res.data.messages);
+        })
+        .catch((err) => {
+          // setAlert(err.response.data.message);
+          console.log(err);
+        });
+    }
+  }, [selectedChat]);
 
   return (
     <UserContext.Provider
