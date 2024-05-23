@@ -7,8 +7,11 @@ export function UserContextProvider({ children }) {
   const [ws, setWs] = useState(null);
   const [id, setId] = useState(null);
   const [username, setUsername] = useState(null);
+  const [avatar, setAvatar] = useState(null);
   const [selectedChat, setSelectedChat] = useState(null);
   const [selectedChatMessages, setSelectedChatMessages] = useState([]);
+  const [newMessagesContacts, setNewMessagesContacts] = useState([]);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     axios
@@ -16,6 +19,7 @@ export function UserContextProvider({ children }) {
       .then((res) => {
         setId(res.data.id);
         setUsername(res.data.username);
+        setAvatar(res.data.avatar);
       })
       .catch((err) => {
         setId(null);
@@ -25,15 +29,15 @@ export function UserContextProvider({ children }) {
   });
 
   useEffect(() => {
+    setPage(1);
+
     if (selectedChat) {
       axios
-        .get(`/messages/${id}/${selectedChat}`)
+        .get(`/messages/${selectedChat}`)
         .then((res) => {
-          // console.log(res);
           setSelectedChatMessages(res.data.messages);
         })
         .catch((err) => {
-          // setAlert(err.response.data.message);
           console.log(err);
         });
     }
@@ -52,6 +56,12 @@ export function UserContextProvider({ children }) {
         setWs,
         selectedChatMessages,
         setSelectedChatMessages,
+        avatar,
+        setAvatar,
+        newMessagesContacts,
+        setNewMessagesContacts,
+        page,
+        setPage,
       }}
     >
       {children}

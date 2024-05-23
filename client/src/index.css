@@ -61,10 +61,27 @@ body,
 
 .send-message-div button,
 .send-message-div input,
+.send-message-div label,
+.username-change,
 .my-bg-transparent {
   background-color: rgb(0, 0, 0, 0.5);
   border: none;
   color: white;
+}
+
+.username-change-save {
+  background-color: rgb(0, 0, 0, 0.3);
+  color: white;
+  border: rgb(255, 255, 255, 0.5) 1px solid;
+}
+
+.username-change-save:hover {
+  background-color: rgb(0, 0, 0, 0.6);
+}
+
+.send-message-div label:hover,
+.send-message-div button:hover {
+  background-color: rgb(0, 0, 0, 0.3);
 }
 
 .my-bg-transparent {
@@ -82,6 +99,12 @@ body,
 
 .border-gray-right {
   border-right: 1px solid rgb(122, 122, 133);
+}
+
+@media (min-width: 1100px) {
+  .border-gray-left {
+    border-left: 1px solid rgb(122, 122, 133);
+  }
 }
 
 .border-gray-bottom {
@@ -211,7 +234,7 @@ body,
 }
 
 .chat-message {
-  max-width: 320px;
+  max-width: 350px;
   border-radius: 10px;
   width: fit-content;
 }
@@ -227,6 +250,7 @@ body,
   overflow-y: scroll;
   height: 100%;
   max-height: 96%;
+  text-align: center;
 }
 
 .dot {
@@ -241,4 +265,81 @@ body,
 
 .logout-button:hover {
   opacity: 60%;
+}
+
+textarea {
+  resize: none;
+  direction: ltr;
+  text-align: left;
+}
+
+.dropdown-menu {
+  min-width: 8rem;
+}
+
+.dropup .dropdown-toggle::after {
+  margin-left: 8px;
+}
+
+.hover-dark:hover {
+  opacity: 70%;
+}
+
+.img-div {
+  width: 400px;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.show-image {
+  max-width: 75%;
+  max-height: 75%;
+}
+
+.avatar-change {
+  height: 100px;
+  width: 100px;
+  background-color: rgb(0, 0, 0, 0.5);
+  margin: auto;
+  border-radius: 50px;
+  color: rgb(255, 255, 255, 0.8);
+}
+
+.time {
+  font-size: 10px;
+}
+
+.new-message {
+  text-align: right;
+  width: 10px;
+  height: 10px;
+  background-color: cornflowerblue;
+  padding: 0;
+  margin-left: auto;
+  border-radius: 5px;
+}
+
+.edit-delete-messsage {
+  gap: 10px;
+  border-radius: 10px;
+  background-color: rgb(0, 0, 0, 0.6);
+  margin-left: -88px;
+  margin-top: -30px;
+  padding: 12px;
+}
+
+.load-more-btn {
+  background-color: rgb(0, 0, 0, 0.45);
+  border: none;
+  border-radius: 10px;
+  color: cornflowerblue;
+  padding: 7px 20px;
+  margin: auto;
+  color: rgb(255, 255, 255, 0.5);
+  justify-self: center;
+}
+
+.load-more-btn:hover {
+  color: rgb(255, 255, 255, 0.8);
 }

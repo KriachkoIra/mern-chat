@@ -5,7 +5,10 @@ const MessageSchema = new mongoose.Schema(
   {
     to: { type: mongoose.Schema.Types.ObjectId, ref: User },
     from: { type: mongoose.Schema.Types.ObjectId, ref: User },
-    text: { type: String, required: true },
+    text: String,
+    filePath: String,
+    fileName: String,
+    isImage: Boolean,
   },
   { timestamps: true }
 );

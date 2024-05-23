@@ -9,7 +9,7 @@ export default function Register() {
   const [alert, setAlert] = useState("");
   const [isRegister, setIsRegister] = useState(false);
 
-  const { setUsername, setId } = useContext(UserContext);
+  const { setUsername, setId, setAvatar } = useContext(UserContext);
 
   const registerUser = async (e) => {
     e.preventDefault();
@@ -21,6 +21,7 @@ export default function Register() {
       .then((res) => {
         setId(res.data.id);
         setUsername(res.data.username);
+        setAvatar(res.data.avatar);
       })
       .catch((err) => {
         setAlert(err.response.data.message);

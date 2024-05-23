@@ -24,7 +24,7 @@ const registerUser = async function (req, res) {
 
     try {
       const token = await jwt.sign(
-        { id: createdUser._id, username },
+        { id: createdUser._id },
         process.env.JWT_KEY
       );
 
@@ -53,12 +53,12 @@ const loginUser = async function (req, res) {
     }
 
     try {
-      const token = await jwt.sign(
-        { id: user._id, username },
-        process.env.JWT_KEY
-      );
+      const token = await jwt.sign({ id: user._id }, process.env.JWT_KEY);
 
-      res.cookie("token", token).status(201).json({ id: user._id, username });
+      res
+        .cookie("token", token)
+        .status(201)
+        .json({ id: user._id, username, avatar: user.avatar });
     } catch (err) {
       throw err;
     }
@@ -66,13 +66,9 @@ const loginUser = async function (req, res) {
 };
 
 const logoutUser = function (req, res) {
-  const { username } = getUserData(req);
+  const { id } = getUserData(req);
 
-  console.log(username);
-
-  [...wss.clients]
-    .filter((cl) => cl.username === username)
-    .forEach((cl) => cl.close());
+  [...wss.clients].filter((cl) => cl.id === id).forEach((cl) => cl.close());
 
   res.clearCookie("token");
   return res.json({ logout: true });
@@ -86,9 +82,11 @@ const verifyUser = async function (req, res) {
       return res.status(401).json("No token.");
     }
 
-    jwt.verify(token, process.env.JWT_KEY, (err, decoded) => {
+    jwt.verify(token, process.env.JWT_KEY, async (err, decoded) => {
       if (err) throw err;
-      res.json(decoded);
+      const user = await User.findById(decoded.id);
+      if (!user) throw "No user.";
+      res.json({ ...decoded, username: user.username, avatar: user.avatar });
     });
   } catch (err) {
     res.status(401).json("Invalid token.");

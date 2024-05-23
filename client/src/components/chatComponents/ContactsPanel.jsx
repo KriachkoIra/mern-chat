@@ -3,25 +3,30 @@ import { UserContext } from "../../context/UserContext";
 import axios from "axios";
 import SearchContactModal from "./SearchContactModal";
 
-export default function ContactsPanel({ usersOnline }) {
+export default function ContactsPanel({
+  usersOnline,
+  setShowSettings,
+  removeIndicator,
+}) {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [contacts, setContacts] = useState([]);
   const [search, setSearch] = useState("");
 
   const {
     username,
-    id,
     setId,
     setUsername,
     setSelectedChat,
     setSelectedChatMessages,
     ws,
     setWs,
+    avatar,
+    setAvatar,
   } = useContext(UserContext);
 
   function getContacts() {
     axios
-      .get(`users/${id}/contacts`)
+      .get(`users/contacts`)
       .then((res) => {
         setContacts(res.data.contacts);
       })
@@ -38,6 +43,7 @@ export default function ContactsPanel({ usersOnline }) {
         setId(null);
         setSelectedChat(null);
         setSelectedChatMessages([]);
+        setAvatar(null);
         ws?.close();
         setWs(null);
         setUsername(null);
@@ -52,16 +58,31 @@ export default function ContactsPanel({ usersOnline }) {
   return (
     <>
       <div className="col-sm-4 col-md-3 border-gray-right mr-1 py-2 px-4">
-        <div className="row gap-1 align-items-center py-2 mb-2">
-          <div className="avatar avatar-main text-center pt-2 rounded-circle col-auto">
-            {username[0]}
+        <div className="row gap-0 align-items-center py-2 mb-2">
+          <div
+            className="avatar avatar-main text-center pt-2 rounded-circle col-auto"
+            style={
+              avatar && {
+                backgroundImage: `url(${axios.defaults.baseURL}/uploads/avatars/${avatar})`,
+                backgroundPosition: "center",
+                backgroundSize: "cover",
+              }
+            }
+          >
+            {!avatar && username[0]}
           </div>
-          <h4 className="col">{username}</h4>
+          <h5 className="col-auto">{username}</h5>
           <button
-            className="col-auto bg-transparent border-0 text-white logout-button"
+            className="col-auto bg-transparent border-0 text-white logout-button px-2"
+            onClick={() => setShowSettings((s) => !s)}
+          >
+            <i className="fa-solid fa-gear"></i>
+          </button>
+          <button
+            className="col-auto bg-transparent border-0 text-white logout-button px-1"
             onClick={logout}
           >
-            <i class="fa-solid fa-right-from-bracket"></i>
+            <i className="fa-solid fa-right-from-bracket"></i>
           </button>
         </div>
 
@@ -82,8 +103,9 @@ export default function ContactsPanel({ usersOnline }) {
               <Contact
                 contact={user}
                 key={user.username}
+                removeIndicator={removeIndicator}
                 isOnline={usersOnline.find(
-                  (u) => u.username?.localeCompare(user.username) === 0
+                  (u) => u.id?.localeCompare(user.id) === 0
                 )}
               />
             ) : null
@@ -123,31 +145,54 @@ function SearchContactPanel({ search, setSearch }) {
   );
 }
 
-function Contact({ contact, isOnline }) {
-  const { selectedChat, setSelectedChat } = useContext(UserContext);
+function Contact({ contact, isOnline, removeIndicator }) {
+  const {
+    selectedChat,
+    setSelectedChat,
+    newMessagesContacts,
+    setNewMessagesContacts,
+  } = useContext(UserContext);
+
+  const isNewMessage = newMessagesContacts.find((c) => c === contact.id);
 
   return (
     <div
       className={`row gap-3 align-items-center py-2 border-gray-bottom contact-div ${
-        contact.username === selectedChat ? "contact-selected" : ""
+        contact.id === selectedChat ? "contact-selected" : ""
       }`}
       style={{ cursor: "pointer" }}
-      onClick={() => setSelectedChat(contact.username)}
+      onClick={() => {
+        setNewMessagesContacts((nmc) => nmc.filter((c) => c !== contact.id));
+        removeIndicator(contact.id);
+        setSelectedChat(contact.id);
+      }}
     >
-      {contact.username === selectedChat && (
-        <div className="selected-side"></div>
-      )}
-      <Avatar username={contact.username} isOnline={isOnline} />{" "}
+      {contact.id === selectedChat && <div className="selected-side"></div>}
+      <Avatar
+        avatar={contact.avatar}
+        username={contact.username}
+        isOnline={isOnline}
+      />{" "}
       {contact.username}
+      {isNewMessage && <span className="new-message"></span>}
     </div>
   );
 }
 
-function Avatar({ username, isOnline }) {
+function Avatar({ username, isOnline, avatar }) {
   return (
-    <div className="avatar text-center pt-2 rounded-circle">
+    <div
+      className="avatar text-center pt-2 rounded-circle"
+      style={
+        avatar && {
+          backgroundImage: `url(${axios.defaults.baseURL}/uploads/avatars/${avatar})`,
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+        }
+      }
+    >
       {isOnline && <div className="dot"></div>}
-      {username[0]}
+      {!avatar && username[0]}
     </div>
   );
 }

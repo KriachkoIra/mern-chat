@@ -2,17 +2,21 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import jwt from "jsonwebtoken";
-import WebSocket, { WebSocketServer } from "ws";
+import { WebSocketServer } from "ws";
 import cookieParser from "cookie-parser";
 import "dotenv/config";
+import fs from "fs";
+import path from "path";
+import sharp from "sharp";
+import bodyParser from "body-parser";
+const __dirname = path.resolve();
 
 import authRouter from "./routes/auth.js";
 import userRouter from "./routes/user.js";
 import messageRouter from "./routes/message.js";
 
-import Message from "./models/Message.js";
-import User from "./models/User.js";
 import { addMessage } from "./controllers/messages.controller.js";
+import { addNewMessageIndicator } from "./controllers/contacts.controller.js";
 
 const uri = `mongodb+srv://kriachkoira:${process.env.DATABASE_PASS}@mern-chat.ch5jhfu.mongodb.net/?retryWrites=true&w=majority&appName=mern-chat`;
 const clientOptions = {
@@ -28,8 +32,11 @@ try {
 }
 
 const app = express();
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.use(express.json());
 app.use(cookieParser());
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(
   cors({
     origin: [process.env.CLIENT_URL],
@@ -55,8 +62,8 @@ wss.on("connection", (connection, req) => {
   connection.checkIsAlive = setInterval(() => {
     connection.ping();
     connection.terminateTimer = setTimeout(() => {
-      connection.terminate();
       clearInterval(connection.checkIsAlive);
+      connection.terminate();
     }, 1000);
   }, 5000);
 
@@ -75,26 +82,64 @@ wss.on("connection", (connection, req) => {
     if (err) throw err;
     const { id, username } = decoded;
 
-    connection.userId = id;
+    connection.id = id;
     connection.username = username;
   });
 
   // receive message
   connection.on("message", async (messageUnparsed) => {
-    const { message, to } = JSON.parse(messageUnparsed.toString());
+    const { message, to, fileName, fileData, isImage } = JSON.parse(
+      messageUnparsed.toString()
+    );
+
+    let newFileName = null;
+    if (fileName) {
+      const data = fileData.split(",");
+      const formattedData = data[data.length - 1];
+
+      const splitted = fileName.split(".");
+      const extension = splitted[splitted.length - 1];
+      newFileName = Date.now() + "." + extension;
+      const bufferData = Buffer.from(formattedData, "base64");
+
+      if (isImage) {
+        newFileName = "min-" + newFileName;
+        await sharp(bufferData)
+          .webp({ quality: 20 })
+          .toFile(__dirname + "/uploads/" + newFileName);
+      } else {
+        fs.writeFileSync(
+          __dirname + "/uploads/" + newFileName,
+          bufferData,
+          (err) => err && console.error(err)
+        );
+      }
+    }
 
     try {
-      const savedMessage = await addMessage(message, connection.userId, to);
+      const savedMessage = await addMessage(
+        message,
+        connection.id,
+        to,
+        fileName,
+        newFileName,
+        isImage
+      );
+
+      addNewMessageIndicator(to, connection.id);
 
       savedMessage &&
         [...wss.clients]
-          .filter((cl) => cl.username === to)
+          .filter((cl) => cl.id === to)
           .forEach((cl) =>
             cl.send(
               JSON.stringify({
                 message,
-                from: connection.username,
+                from: connection.id,
                 msgId: savedMessage._id,
+                fileName,
+                filePath: newFileName,
+                createdAt: savedMessage.createdAt,
               })
             )
           );
@@ -107,7 +152,7 @@ wss.on("connection", (connection, req) => {
   setInterval(() => {
     const usersOnline = [...wss.clients].map((user) => {
       return {
-        userId: user.userId,
+        id: user.id,
         username: user.username,
       };
     });

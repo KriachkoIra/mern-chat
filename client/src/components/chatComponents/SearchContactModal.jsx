@@ -6,13 +6,11 @@ export default function SearchContactModal({ setIsOpen, getContacts }) {
   const [searchUser, setSearchUser] = useState("");
   const [resultUsers, setResultUsers] = useState([]);
 
-  const { id, username } = useContext(UserContext);
-
   const handleChange = function (e) {
     setSearchUser(e.target.value);
 
     axios
-      .get(`users/${id}/seachContacts?usernameSearch=${e.target.value}`)
+      .get(`users/searchContacts?usernameSearch=${e.target.value}`)
       .then((res) => {
         setResultUsers(res.data.users);
       })
@@ -72,11 +70,9 @@ export default function SearchContactModal({ setIsOpen, getContacts }) {
 }
 
 function SearchUser({ user, setIsOpen, getContacts }) {
-  const { username, id } = useContext(UserContext);
-
   const handleAdd = function () {
     axios
-      .post(`users/${id}/contacts`, { usernameAdd: user.username })
+      .post(`users/contacts`, { usernameAdd: user.username })
       .then((res) => {
         setIsOpen(false);
         getContacts();
@@ -93,7 +89,7 @@ function SearchUser({ user, setIsOpen, getContacts }) {
       style={{ cursor: "pointer" }}
     >
       <div className="col row align-items-center gap-3">
-        <Avatar username={user.username} /> {user.username}
+        <Avatar username={user.username} avatar={user.avatar} /> {user.username}
       </div>
       <button
         className="col-auto text-white bg-transparent border-0"
@@ -105,8 +101,19 @@ function SearchUser({ user, setIsOpen, getContacts }) {
   );
 }
 
-function Avatar({ username }) {
+function Avatar({ username, avatar }) {
   return (
-    <div className="avatar text-center pt-2 rounded-circle">{username[0]}</div>
+    <div
+      className="avatar text-center pt-2 rounded-circle"
+      style={
+        avatar && {
+          backgroundImage: `url(${axios.defaults.baseURL}/uploads/avatars/${avatar})`,
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+        }
+      }
+    >
+      {!avatar && username[0]}
+    </div>
   );
 }

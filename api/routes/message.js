@@ -1,9 +1,14 @@
 import express from "express";
-import mongoose from "mongoose";
-import { getMessages } from "../controllers/messages.controller.js";
+import {
+  getMessages,
+  deleteMessage,
+  editMessage,
+} from "../controllers/messages.controller.js";
 
 const router = express.Router();
 
-router.get("/:id/:contactName", getMessages);
+router.get("/:contactId", getMessages);
+router.delete("/:msgId", deleteMessage);
+router.patch("/:msgId", editMessage);
 
 export default router;
