@@ -12,6 +12,7 @@ export function UserContextProvider({ children }) {
   const [selectedChatMessages, setSelectedChatMessages] = useState([]);
   const [newMessagesContacts, setNewMessagesContacts] = useState([]);
   const [page, setPage] = useState(1);
+  const [sharedSecret, setSharedSecret] = useState("");
 
   useEffect(() => {
     axios
@@ -62,6 +63,8 @@ export function UserContextProvider({ children }) {
         setNewMessagesContacts,
         page,
         setPage,
+        sharedSecret,
+        setSharedSecret,
       }}
     >
       {children}

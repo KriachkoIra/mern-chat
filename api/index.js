@@ -14,6 +14,7 @@ const __dirname = path.resolve();
 import authRouter from "./routes/auth.js";
 import userRouter from "./routes/user.js";
 import messageRouter from "./routes/message.js";
+import encryptRouter from "./routes/encryption.js";
 
 import { addMessage } from "./controllers/messages.controller.js";
 import { addNewMessageIndicator } from "./controllers/contacts.controller.js";
@@ -51,6 +52,7 @@ app.get("/test", (req, res) => {
 app.use("/auth", authRouter);
 app.use("/users", userRouter);
 app.use("/messages", messageRouter);
+app.use("/encrypt", encryptRouter);
 
 const server = app.listen(3001, () => {
   console.log(`Server is running on port 3001.`);

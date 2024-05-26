@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import axios from "axios";
 import { UserContext } from "../context/UserContext";
-import { Link } from "react-router-dom";
+import crypto from "crypto-browserify";
 
 export default function Register() {
   const [username, setUsernameField] = useState("");
@@ -9,7 +9,8 @@ export default function Register() {
   const [alert, setAlert] = useState("");
   const [isRegister, setIsRegister] = useState(false);
 
-  const { setUsername, setId, setAvatar } = useContext(UserContext);
+  const { setUsername, setId, setAvatar, sharedSecret, setSharedSecret } =
+    useContext(UserContext);
 
   const registerUser = async (e) => {
     e.preventDefault();
@@ -18,10 +19,53 @@ export default function Register() {
 
     await axios
       .post(link, { username, password })
-      .then((res) => {
+      .then(async (res) => {
         setId(res.data.id);
         setUsername(res.data.username);
         setAvatar(res.data.avatar);
+
+        try {
+          const personalPublicKey = await axios.get(
+            `/encrypt/public-key/${res.data.id}`
+          );
+
+          if (!personalPublicKey.data.publicKey) {
+            const savedKey = localStorage.getItem("clientKey");
+
+            if (savedKey) {
+              console.log("key exists.");
+              const key = JSON.parse(savedKey);
+
+              await axios.post("https://localhost:3001/public-key", {
+                id: res.data.id,
+                publicKey: key.toString("base64"),
+              });
+
+              return;
+            }
+
+            console.log("key doesn't exist.");
+            const serverResponse = await axios.get(`/encrypt/public-key`);
+
+            const { prime, generator } = serverResponse.data;
+
+            const client = crypto.createDiffieHellman(
+              Buffer.from(prime, "base64"),
+              Buffer.from(generator, "base64")
+            );
+            const clientKey = client.generateKeys();
+
+            localStorage.setItem("client", JSON.stringify(client));
+            localStorage.setItem("clientKey", JSON.stringify(clientKey));
+
+            await axios.post("/encrypt/public-key", {
+              id: res.data.id,
+              publicKey: clientKey.toString("base64"),
+            });
+          }
+        } catch (err) {
+          console.log(err);
+        }
       })
       .catch((err) => {
         setAlert(err.response.data.message);
