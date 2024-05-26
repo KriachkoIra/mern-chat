@@ -48,7 +48,8 @@ const addMessage = async function (
   to,
   fileName,
   newFileName,
-  isImage
+  isImage,
+  iv
 ) {
   const fromUser = await User.findById(from);
   const toUser = await User.findById(to);
@@ -73,6 +74,7 @@ const addMessage = async function (
       filePath: newFileName || null,
       fileName: fileName || null,
       isImage: isImage || null,
+      iv,
     });
 
     const savedMessage = await dbMessage.save();
@@ -119,6 +121,7 @@ const editMessage = async function (req, res) {
   const userId = getUserData(req)?.id;
   const msgId = req.params.msgId;
   const newText = req.body.text;
+  const iv = req.body.iv;
 
   if (!userId || !msgId || !newText)
     return res.status(400).json("Invalid user or message.");
@@ -129,6 +132,7 @@ const editMessage = async function (req, res) {
     if (!message.from.equals(userId)) throw "Message does not belong to user.";
 
     message.text = newText;
+    message.iv = iv;
     await message.save();
 
     [...wss.clients]

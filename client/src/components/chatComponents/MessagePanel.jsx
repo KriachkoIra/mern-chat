@@ -1,9 +1,11 @@
 import { useState, useContext, useRef, useEffect } from "react";
 import { UserContext } from "../../context/UserContext";
 import axios from "axios";
+import { encrypt, decrypt } from "../../encrypt";
 
 export default function MessagesPanel({ handleMessage, deletedMessages }) {
   const [isLast, setIsLast] = useState(false);
+  const [wait, setWait] = useState(false);
 
   const {
     selectedChat,
@@ -15,7 +17,14 @@ export default function MessagesPanel({ handleMessage, deletedMessages }) {
   const messagesContainerEnd = useRef();
   const curPageScroll = useRef();
 
-  useEffect(() => setIsLast(false), [selectedChat]);
+  useEffect(() => {
+    setIsLast(false);
+    setWait(true);
+
+    setTimeout(() => {
+      setWait(false);
+    }, 350);
+  }, [selectedChat]);
 
   const toDate = function (date) {
     const d = new Date(date);
@@ -40,7 +49,11 @@ export default function MessagesPanel({ handleMessage, deletedMessages }) {
   };
 
   return (
-    <div className="col my-padding h-100 justify-content-around">
+    <div
+      className={`col my-padding h-100 justify-content-around ${
+        wait ? "d-none" : ""
+      }`}
+    >
       <div className="h-100 gap-0">
         {selectedChat ? (
           <>
@@ -48,11 +61,13 @@ export default function MessagesPanel({ handleMessage, deletedMessages }) {
               {selectedChatMessages?.length === 0 && (
                 <p className="text-gray mt-3 text-center">No messages yet.</p>
               )}
-              {!isLast && (
-                <button onClick={getNextPage} className="load-more-btn">
-                  Load more
-                </button>
-              )}
+              {selectedChatMessages?.length !== 0 &&
+                selectedChatMessages?.length >= 30 &&
+                !isLast && (
+                  <button onClick={getNextPage} className="load-more-btn">
+                    Load more
+                  </button>
+                )}
               {selectedChatMessages?.map((msg, i) => {
                 const num = Math.max(
                   selectedChatMessages.length - (page - 1) * 30,
@@ -115,14 +130,31 @@ export default function MessagesPanel({ handleMessage, deletedMessages }) {
 }
 
 function Message({ msg, isScroll, curPageScroll }) {
-  const { id } = useContext(UserContext);
+  const { id, sharedSecret } = useContext(UserContext);
   const [imgShow, setImgShow] = useState(false);
   const [editDeleteShow, setEditDeleteShow] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
   const [edit, setEdit] = useState(false);
   const [txtMessage, setTxtMessage] = useState(msg.text);
+  const [wait, setWait] = useState(false);
 
   const isMine = id.localeCompare(msg.from) === 0;
+
+  useEffect(() => {
+    setWait(true);
+
+    setTimeout(() => {
+      setWait(false);
+    }, 300);
+  }, []);
+
+  useEffect(() => {
+    if (msg.iv) {
+      const secret = document.getElementById("secret").innerHTML;
+      const decrypted = decrypt(secret, msg.text, msg.iv);
+      setTxtMessage(decrypted);
+    }
+  }, [sharedSecret]);
 
   function deleteMessage() {
     axios
@@ -131,16 +163,17 @@ function Message({ msg, isScroll, curPageScroll }) {
         setIsDeleted(true);
       })
       .catch((err) => {
-        // setAlert(err.response.data.message);
         console.log(err);
       });
   }
 
   function editMessage() {
+    const { encrypted, iv } = encrypt(sharedSecret, txtMessage);
     axios
-      .patch(`messages/${msg._id}`, { text: txtMessage })
+      .patch(`messages/${msg._id}`, { text: encrypted, iv })
       .then(() => {
         msg.text = txtMessage;
+        msg.iv = iv;
         setEditDeleteShow(true);
         setEdit(false);
       })
@@ -153,10 +186,13 @@ function Message({ msg, isScroll, curPageScroll }) {
   return isDeleted ? null : (
     <>
       {isScroll && <div ref={curPageScroll} id="scroll"></div>}
+      <div id="secret" className="d-none">
+        {sharedSecret}
+      </div>
       <div
         className={`px-3 py-2 chat-message mb-2 ${
           isMine ? "my-message" : "others-message"
-        }`}
+        } ${wait ? "my-d-none" : ""}`}
         style={{ textAlign: "justify" }}
         onClick={() => isMine && setEditDeleteShow((eds) => !eds)}
       >
@@ -197,7 +233,9 @@ function Message({ msg, isScroll, curPageScroll }) {
           </>
         )}
         {!edit ? (
-          <span className="text-start">{msg.text}</span>
+          <span className="text-start">
+            {msg.iv ? decrypt(sharedSecret, msg.text, msg.iv) : msg.text}
+          </span>
         ) : (
           <>
             <textarea
@@ -224,8 +262,13 @@ function Message({ msg, isScroll, curPageScroll }) {
             </div>
           </>
         )}
-        <div className="time" style={{ opacity: "70%" }}>
-          {msg.createdAt.split("T")[1].substring(0, 5)}
+        <div
+          className={`time ${isMine ? "text-end" : ""}`}
+          style={{ opacity: "70%" }}
+        >
+          {msg.createdAt === msg.updatedAt
+            ? msg.createdAt.split("T")[1].substring(0, 5)
+            : "Edited " + msg.updatedAt.split("T")[1].substring(0, 5)}
         </div>
         {editDeleteShow && (
           <div className={`position-relative`}>
@@ -278,21 +321,30 @@ function ViewImage({ imgShow, setImgShow, filePath }) {
 function NewMessagePanel({ setMessages, messagesContainerEnd, handleMessage }) {
   const [messageText, setMessageText] = useState("");
 
-  const { setWs, ws, selectedChat, id, setSelectedChatMessages } =
+  const { setWs, ws, selectedChat, id, setSelectedChatMessages, sharedSecret } =
     useContext(UserContext);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       document.getElementById("anchor").scrollIntoView();
-    }, 150);
+    }, 250);
 
-    return () => clearTimeout(timeoutId);
+    const timeoutId2 = setTimeout(() => {
+      document.getElementById("anchor").scrollIntoView();
+    }, 400);
+
+    return () => {
+      clearTimeout(timeoutId);
+      clearTimeout(timeoutId2);
+    };
   }, [selectedChat]);
 
   const sendMessage = function (e, file) {
     e?.preventDefault();
 
     if (!file && !messageText) return;
+
+    const { encrypted, iv } = encrypt(sharedSecret, messageText);
 
     if (ws.readyState === 2 || ws.readyState === 3) {
       console.log("reconnecting");
@@ -303,11 +355,12 @@ function NewMessagePanel({ setMessages, messagesContainerEnd, handleMessage }) {
         () =>
           socket.send(
             JSON.stringify({
-              message: messageText,
+              message: encrypted,
               to: selectedChat,
               fileName: file?.name,
               fileData: file?.data,
               isImage: file?.isImage,
+              iv,
             })
           ),
         300
@@ -315,11 +368,12 @@ function NewMessagePanel({ setMessages, messagesContainerEnd, handleMessage }) {
     } else {
       ws.send(
         JSON.stringify({
-          message: messageText,
+          message: encrypted,
           to: selectedChat,
           fileName: file?.name,
           fileData: file?.data,
           isImage: file?.isImage,
+          iv,
         })
       );
     }

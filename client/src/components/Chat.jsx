@@ -100,6 +100,7 @@ export default function Chat() {
               fileName: data.fileName,
               filePath: data.filePath,
               createdAt: data.createdAt,
+              iv: data.iv,
             },
           ],
           "_id"

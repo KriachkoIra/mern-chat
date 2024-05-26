@@ -1,5 +1,7 @@
 import axios from "axios";
 import { createContext, useEffect, useState } from "react";
+import crypto from "crypto-browserify";
+import sjcl from "sjcl";
 
 export const UserContext = createContext({});
 
@@ -29,18 +31,56 @@ export function UserContextProvider({ children }) {
       });
   });
 
+  // set shared secret
   useEffect(() => {
     setPage(1);
 
     if (selectedChat) {
-      axios
-        .get(`/messages/${selectedChat}`)
-        .then((res) => {
-          setSelectedChatMessages(res.data.messages);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+      axios.get(`encrypt/public-key/${selectedChat}`).then(async (res) => {
+        const otherPublicKey = res.data.publicKey;
+
+        const clientPublicKey = localStorage.getItem("clientPublicKey" + id);
+        const clientPrivateKeyEncrypted = localStorage.getItem(
+          "clientPrivateKey" + id
+        );
+
+        const bitArray = sjcl.hash.sha256.hash(process.env.REACT_APP_SECRET);
+        const key = sjcl.codec.hex.fromBits(bitArray);
+        const clientPrivateKey = sjcl.json.decrypt(
+          key,
+          clientPrivateKeyEncrypted
+        );
+
+        if (clientPublicKey && clientPrivateKey) {
+          const serverResponse = await axios.get(`/encrypt/public-key`);
+
+          const { prime, generator } = serverResponse.data;
+
+          const client = crypto.createDiffieHellman(
+            Buffer.from(prime, "base64"),
+            Buffer.from(generator, "base64")
+          );
+
+          client.setPublicKey(Buffer.from(clientPublicKey, "base64"));
+          client.setPrivateKey(Buffer.from(clientPrivateKey, "base64"));
+
+          const sharedSecret = client.computeSecret(
+            Buffer.from(otherPublicKey, "base64")
+          );
+          setSharedSecret(sharedSecret.toString("base64"));
+
+          console.log("secret: ", sharedSecret.toString("base64"));
+
+          axios
+            .get(`/messages/${selectedChat}`)
+            .then((res) => {
+              setSelectedChatMessages(res.data.messages);
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        }
+      });
     }
   }, [selectedChat]);
 

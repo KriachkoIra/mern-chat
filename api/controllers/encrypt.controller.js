@@ -64,7 +64,7 @@ const setPublicKey = async function (req, res) {
     const user = await User.findById(id);
     if (!user) throw "No user.";
 
-    user = { ...user, publicKey };
+    user.publicKey = publicKey;
     await user.save();
 
     res.json("Key saved.");

@@ -90,7 +90,7 @@ wss.on("connection", (connection, req) => {
 
   // receive message
   connection.on("message", async (messageUnparsed) => {
-    const { message, to, fileName, fileData, isImage } = JSON.parse(
+    const { message, to, fileName, fileData, isImage, iv } = JSON.parse(
       messageUnparsed.toString()
     );
 
@@ -125,7 +125,8 @@ wss.on("connection", (connection, req) => {
         to,
         fileName,
         newFileName,
-        isImage
+        isImage,
+        iv
       );
 
       addNewMessageIndicator(to, connection.id);
@@ -142,6 +143,7 @@ wss.on("connection", (connection, req) => {
                 fileName,
                 filePath: newFileName,
                 createdAt: savedMessage.createdAt,
+                iv,
               })
             )
           );

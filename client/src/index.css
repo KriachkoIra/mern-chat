@@ -27,6 +27,35 @@ body,
   backdrop-filter: blur(7px);
 }
 
+.register-container {
+  background-color: rgb(0, 0, 0, 0.5);
+  border-radius: 15px;
+  backdrop-filter: blur(7px);
+  padding: 70px 0;
+}
+
+.btn-register {
+  background-color: rgb(0, 0, 0, 0.5);
+  color: white;
+  border: 1px black solid;
+  border-radius: 10px;
+}
+
+.btn-register:hover {
+  background-color: rgb(0, 0, 0, 0.3);
+}
+
+.btn-register-switch {
+  background-color: transparent;
+  border: none;
+  color: white;
+  text-decoration: underline;
+}
+
+.btn-register-switch:hover {
+  opacity: 70%;
+}
+
 .bg-btn {
   position: absolute;
   bottom: 30px;

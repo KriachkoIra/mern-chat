@@ -9,6 +9,7 @@ const MessageSchema = new mongoose.Schema(
     filePath: String,
     fileName: String,
     isImage: Boolean,
+    iv: String,
   },
   { timestamps: true }
 );
