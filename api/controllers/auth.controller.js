@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { wss } from "../index.js";
 import { getUserData } from "./user.controller.js";
+import Message from "../models/Message.js";
 
 const registerUser = async function (req, res) {
   try {
@@ -29,7 +30,11 @@ const registerUser = async function (req, res) {
       );
 
       res
-        .cookie("token", token)
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: true,
+          sameSite: "None",
+        })
         .status(201)
         .json({ id: createdUser._id, username });
     } catch (err) {
@@ -56,7 +61,11 @@ const loginUser = async function (req, res) {
       const token = await jwt.sign({ id: user._id }, process.env.JWT_KEY);
 
       res
-        .cookie("token", token)
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: true,
+          sameSite: "None",
+        })
         .status(201)
         .json({ id: user._id, username, avatar: user.avatar });
     } catch (err) {
@@ -93,4 +102,28 @@ const verifyUser = async function (req, res) {
   }
 };
 
-export { registerUser, loginUser, logoutUser, verifyUser };
+const checkUserImage = async function (req, res, next) {
+  const path = req.originalUrl.split("/");
+  if (path.includes("avatars")) return next();
+
+  const { id } = getUserData(req);
+  if (!id) return res.status(400).json("Invalid user.");
+
+  const filePath = req.path.replace("/", "");
+
+  const messages = await Message.find({
+    $or: [
+      {
+        $and: [{ to: id }, { filePath }],
+      },
+      {
+        $and: [{ from: id }, { filePath }],
+      },
+    ],
+  });
+
+  if (messages.length > 0) return next();
+  return res.status(404).json("Image forbidden.");
+};
+
+export { registerUser, loginUser, logoutUser, verifyUser, checkUserImage };

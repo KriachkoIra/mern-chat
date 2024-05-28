@@ -27,7 +27,7 @@ export default function Chat() {
   useEffect(() => {
     if (!ws || ws.readyState === 3) {
       ws?.close();
-      const socket = new WebSocket("ws://localhost:3001");
+      const socket = new WebSocket("wss://localhost:3001");
       socket.addEventListener("message", handleMessage);
       socket.addEventListener("close", reconnect);
       setWs(socket);

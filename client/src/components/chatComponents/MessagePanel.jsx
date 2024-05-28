@@ -267,8 +267,8 @@ function Message({ msg, isScroll, curPageScroll }) {
           style={{ opacity: "70%" }}
         >
           {msg.createdAt === msg.updatedAt
-            ? msg.createdAt.split("T")[1].substring(0, 5)
-            : "Edited " + msg.updatedAt.split("T")[1].substring(0, 5)}
+            ? msg.createdAt?.split("T")[1].substring(0, 5)
+            : "Edited " + msg.updatedAt?.split("T")[1].substring(0, 5)}
         </div>
         {editDeleteShow && (
           <div className={`position-relative`}>
@@ -348,7 +348,7 @@ function NewMessagePanel({ setMessages, messagesContainerEnd, handleMessage }) {
 
     if (ws.readyState === 2 || ws.readyState === 3) {
       console.log("reconnecting");
-      const socket = new WebSocket("ws://localhost:3001");
+      const socket = new WebSocket("wss://localhost:3001");
       socket.addEventListener("message", handleMessage);
       setWs(socket);
       setTimeout(
@@ -406,6 +406,7 @@ function NewMessagePanel({ setMessages, messagesContainerEnd, handleMessage }) {
           from: id,
           _id: Date.now(),
           createdAt: date.toISOString(),
+          updatedAt: date.toISOString(),
         },
       ]);
     }

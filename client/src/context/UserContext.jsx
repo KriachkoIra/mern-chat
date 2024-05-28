@@ -69,8 +69,6 @@ export function UserContextProvider({ children }) {
           );
           setSharedSecret(sharedSecret.toString("base64"));
 
-          console.log("secret: ", sharedSecret.toString("base64"));
-
           axios
             .get(`/messages/${selectedChat}`)
             .then((res) => {

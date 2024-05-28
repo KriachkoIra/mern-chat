@@ -5,7 +5,7 @@ import { UserContext } from "./context/UserContext.jsx";
 import Chat from "./components/Chat.jsx";
 
 function App() {
-  axios.defaults.baseURL = "http://localhost:3001";
+  axios.defaults.baseURL = "https://localhost:3001";
   axios.defaults.withCredentials = true;
 
   const { username } = useContext(UserContext);

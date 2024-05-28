@@ -9,6 +9,8 @@ import fs from "fs";
 import path from "path";
 import sharp from "sharp";
 import bodyParser from "body-parser";
+import https from "https";
+
 const __dirname = path.resolve();
 
 import authRouter from "./routes/auth.js";
@@ -18,6 +20,7 @@ import encryptRouter from "./routes/encryption.js";
 
 import { addMessage } from "./controllers/messages.controller.js";
 import { addNewMessageIndicator } from "./controllers/contacts.controller.js";
+import { checkUserImage } from "./controllers/auth.controller.js";
 
 const uri = `mongodb+srv://kriachkoira:${process.env.DATABASE_PASS}@mern-chat.ch5jhfu.mongodb.net/?retryWrites=true&w=majority&appName=mern-chat`;
 const clientOptions = {
@@ -37,7 +40,11 @@ app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.use(express.json());
 app.use(cookieParser());
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use(
+  "/uploads",
+  checkUserImage,
+  express.static(path.join(__dirname, "uploads"))
+);
 app.use(
   cors({
     origin: [process.env.CLIENT_URL],
@@ -54,8 +61,20 @@ app.use("/users", userRouter);
 app.use("/messages", messageRouter);
 app.use("/encrypt", encryptRouter);
 
-const server = app.listen(3001, () => {
-  console.log(`Server is running on port 3001.`);
+app.get("/", (req, res) => {
+  res.json("ok");
+});
+
+const server = https.createServer(
+  {
+    pfx: fs.readFileSync("./certificate.pfx"),
+    passphrase: process.env.PASSPHRASE,
+  },
+  app
+);
+
+server.listen(3001, () => {
+  console.log("Server is running on port 3001.");
 });
 
 export const wss = new WebSocketServer({ server });
